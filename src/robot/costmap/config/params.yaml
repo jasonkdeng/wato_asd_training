@@ -1,0 +1,8 @@
+costmap_node:
+  ros__parameters:
+    resolution: 0.15
+    width: 300
+    height: 300
+    origin_x: -25.0
+    origin_y: -25.0
+    inflation_radius: 8
