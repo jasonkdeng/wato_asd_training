@@ -48,6 +48,7 @@ void CostmapNode::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr sca
     }
   }
 
+  costmap_.dilateObstacles();
   costmap_.inflateObstacles();
   costmap_.enforceHardBoundary();
   costmap_.publishCostmap(costmapPub_, scan);

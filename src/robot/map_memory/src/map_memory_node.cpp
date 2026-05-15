@@ -35,12 +35,6 @@ void MapMemoryNode::handleLocalMap(const nav_msgs::msg::OccupancyGrid::SharedPtr
     return;
   }
 
-  double distanceMoved =
-      std::hypot(robotPositionX_ - previousPositionX_, robotPositionY_ - previousPositionY_);
-
-  previousPositionX_ = robotPositionX_;
-  previousPositionY_ = robotPositionY_;
-
   mapMemory_->integrateLocalMap(msg, robotPositionX_, robotPositionY_, robotOrientationTheta_);
 }
 

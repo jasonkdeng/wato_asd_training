@@ -60,6 +60,24 @@ void CostmapCore::markObstacle(int xGrid, int yGrid) {
     }
 }
 
+void CostmapCore::dilateObstacles() {
+    std::vector<int> dilated = costmap_;
+
+    for (int y = 1; y < costmapHeight_ - 1; ++y) {
+        for (int x = 1; x < costmapWidth_ - 1; ++x) {
+            if (costmap_[y * costmapWidth_ + x] == 100) {
+                for (int dy = -1; dy <= 1; ++dy) {
+                    for (int dx = -1; dx <= 1; ++dx) {
+                        dilated[(y + dy) * costmapWidth_ + (x + dx)] = 100;
+                    }
+                }
+            }
+        }
+    }
+
+    costmap_ = dilated;
+}
+
 void CostmapCore::inflateObstacles() {
     int maxCost = 100;
     int radiusSq = inflationRadius_ * inflationRadius_;

@@ -5,7 +5,7 @@
 namespace robot {
 
 MapMemoryCore::MapMemoryCore(const rclcpp::Logger& logger)
-    : logger_(logger), lastRobotX_(0), lastRobotY_(0), moveThreshold_(5.0) {
+  : logger_(logger), lastRobotX_(0), lastRobotY_(0), moveThreshold_(0.5) {
   globalMap_ = std::make_shared<nav_msgs::msg::OccupancyGrid>();
 }
 
@@ -45,12 +45,16 @@ void MapMemoryCore::integrateLocalMap(const nav_msgs::msg::OccupancyGrid::Shared
         if (mapCoordinatesToGlobal(worldX, worldY, globalX, globalY)) {
           int globalIndex = globalY * globalMap_->info.width + globalX;
 
+          int8_t existingVal = globalMap_->data[globalIndex];
+          int8_t newVal = localMap->data[index];
+
           if (!updatedCells_[globalIndex]) {
-            globalMap_->data[globalIndex] = localMap->data[index];
+            globalMap_->data[globalIndex] = newVal;
             updatedCells_[globalIndex] = true;
+          } else if (existingVal >= 50) {
+            globalMap_->data[globalIndex] = std::max(existingVal, newVal);
           } else {
-            globalMap_->data[globalIndex] =
-                std::max(globalMap_->data[globalIndex], localMap->data[index]);
+            globalMap_->data[globalIndex] = std::max(existingVal, newVal);
           }
         }
       }

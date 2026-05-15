@@ -27,9 +27,6 @@ private:
     double robotPositionX_ = 0.0;
     double robotPositionY_ = 0.0;
     double robotOrientationTheta_ = 0.0;
-    double previousPositionX_ = 0.0;
-    double previousPositionY_ = 0.0;
-    double movementThreshold_ = 5.0;
 };
 
 #endif

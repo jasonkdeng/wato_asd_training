@@ -24,6 +24,8 @@ public:
 
     void markObstacle(int xGrid, int yGrid);
 
+    void dilateObstacles();
+
     void inflateObstacles();
 
     void enforceHardBoundary();
