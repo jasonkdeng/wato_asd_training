@@ -26,6 +26,8 @@ public:
 
     void inflateObstacles();
 
+    void enforceHardBoundary();
+
     void publishCostmap(
         rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr costmapPub,
         const sensor_msgs::msg::LaserScan::SharedPtr& laserScanMsg);

@@ -9,4 +9,5 @@ planner_node:
     goal_tolerance: 1.5
     plan_timeout_seconds: 60.0
     goal_search_radius: 1.5
-    clearance_cost_threshold: 60
+    clearance_cost_threshold: 15
+    hard_obstacle_threshold: 30

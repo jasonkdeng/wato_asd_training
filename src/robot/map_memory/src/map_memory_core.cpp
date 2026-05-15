@@ -1,4 +1,5 @@
 #include "map_memory_core.hpp"
+#include <algorithm>
 #include <cmath>
 
 namespace robot {
@@ -70,8 +71,6 @@ bool MapMemoryCore::mapCoordinatesToGlobal(double worldX, double worldY, int& gl
   double originX = globalMap_->info.origin.position.x;
   double originY = globalMap_->info.origin.position.y;
   double resolution = globalMap_->info.resolution;
-
-  if (worldX < originX || worldY < originY) return false;
 
   globalX = static_cast<int>((worldX - originX) / resolution);
   globalY = static_cast<int>((worldY - originY) / resolution);

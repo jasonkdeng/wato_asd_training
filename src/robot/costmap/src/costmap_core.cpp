@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 
 #include "costmap_core.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
@@ -77,12 +78,45 @@ void CostmapCore::inflateObstacles() {
                             if (inflateX >= 0 && inflateX < costmapWidth_ &&
                                 inflateY >= 0 && inflateY < costmapHeight_) {
                                 double dist = std::sqrt(distSq);
-                                int inflatedCost = maxCost * (1.0 - (dist / inflationRadius_));
+                                double decay = std::exp(-3.0 * dist / inflationRadius_);
+                                int inflatedCost = static_cast<int>(maxCost * decay);
                                 int flatIndex = inflateY * costmapWidth_ + inflateX;
                                 costmap_[flatIndex] = std::max(costmap_[flatIndex], inflatedCost);
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+void CostmapCore::enforceHardBoundary() {
+    int maxCost = 100;
+    int boundaryCost = 90;
+
+    for (int y = 0; y < costmapHeight_; ++y) {
+        for (int x = 0; x < costmapWidth_; ++x) {
+            int index = y * costmapWidth_ + x;
+            if (costmap_[index] != maxCost) {
+                continue;
+            }
+
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    if (dx == 0 && dy == 0) {
+                        continue;
+                    }
+
+                    int neighborX = x + dx;
+                    int neighborY = y + dy;
+                    if (neighborX < 0 || neighborX >= costmapWidth_ ||
+                        neighborY < 0 || neighborY >= costmapHeight_) {
+                        continue;
+                    }
+
+                    int neighborIndex = neighborY * costmapWidth_ + neighborX;
+                    costmap_[neighborIndex] = std::max(costmap_[neighborIndex], boundaryCost);
                 }
             }
         }
