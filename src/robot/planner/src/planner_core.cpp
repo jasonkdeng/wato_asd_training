@@ -8,12 +8,14 @@ namespace robot
 PlannerCore::PlannerCore(const rclcpp::Logger& logger) : path_(std::make_shared<nav_msgs::msg::Path>()), map_(std::make_shared<nav_msgs::msg::OccupancyGrid>()), logger_(logger) {}
 
 void PlannerCore::initPlanner(double smoothingFactor, int iterations, double goalTolerance,
-                              double goalSearchRadius, int clearanceCostThreshold) {
+                              double goalSearchRadius, int clearanceCostThreshold,
+                              int hardObstacleThreshold) {
   smoothingFactor_ = smoothingFactor;
   iterations_ = iterations;
   goalTolerance_ = goalTolerance;
   goalSearchRadius_ = goalSearchRadius;
   clearanceCostThreshold_ = clearanceCostThreshold;
+  hardObstacleThreshold_ = hardObstacleThreshold;
 }
 
 int PlannerCore::cellCost(const CellIndex &idx) const {
@@ -31,7 +33,7 @@ int PlannerCore::cellCost(const CellIndex &idx) const {
 }
 
 bool PlannerCore::isTraversable(const CellIndex &idx) const {
-  return cellCost(idx) <= clearanceCostThreshold_;
+  return cellCost(idx) < hardObstacleThreshold_;
 }
 
 bool PlannerCore::findSafeGoalCell(const CellIndex &goalIdx, CellIndex &safeGoalIdx) const {
@@ -202,14 +204,19 @@ bool PlannerCore::doAStar(const CellIndex &startIdx, const CellIndex &goalIdx,
       }
 
       int costVal = cellCost(nb);
-      if (costVal >= clearanceCostThreshold_) {
+      if (costVal >= hardObstacleThreshold_) {
         continue;
       }
 
       // Step cost: 1.0 orth, sqrt(2) diag
       double stepCost = stepDistance(cidx, nb);
-      // Add a stronger penalty so the planner prefers the center of free space.
-      double penalty = (static_cast<double>(costVal) * static_cast<double>(costVal)) / 1000.0;
+      // Stronger penalty so the planner prefers the center of free space.
+      double normalizedCost = static_cast<double>(costVal) /
+                              static_cast<double>(clearanceCostThreshold_);
+      double penalty = stepCost * normalizedCost * normalizedCost * 8.0;
+      if (costVal > clearanceCostThreshold_) {
+        penalty += 5.0 * stepCost;
+      }
 
       double tentativeG = currentG + stepCost + penalty;
       double oldG = getScore(gScore, nb);

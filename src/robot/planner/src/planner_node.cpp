@@ -22,7 +22,7 @@ PlannerNode::PlannerNode() : Node("planner"), planner_(robot::PlannerCore(this->
                                    std::bind(&PlannerNode::timerCallback, this));
 
   planner_.initPlanner(smoothingFactor_, iterations_, goalTolerance_, goalSearchRadius_,
-                       clearanceCostThreshold_);
+                       clearanceCostThreshold_, hardObstacleThreshold_);
 }
 
 void PlannerNode::processParameters() {
@@ -36,7 +36,8 @@ void PlannerNode::processParameters() {
   this->declare_parameter<double>("goal_tolerance", 0.3);
   this->declare_parameter<double>("plan_timeout_seconds", 10.0);
   this->declare_parameter<double>("goal_search_radius", 1.5);
-  this->declare_parameter<int>("clearance_cost_threshold", 60);
+  this->declare_parameter<int>("clearance_cost_threshold", 30);
+  this->declare_parameter<int>("hard_obstacle_threshold", 55);
 
   mapTopic_ = this->get_parameter("map_topic").as_string();
   goalTopic_ = this->get_parameter("goal_topic").as_string();
@@ -48,6 +49,7 @@ void PlannerNode::processParameters() {
   planTimeout_ = this->get_parameter("plan_timeout_seconds").as_double();
   goalSearchRadius_ = this->get_parameter("goal_search_radius").as_double();
   clearanceCostThreshold_ = this->get_parameter("clearance_cost_threshold").as_int();
+  hardObstacleThreshold_ = this->get_parameter("hard_obstacle_threshold").as_int();
 }
 
 void PlannerNode::mapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr mapMsg) {

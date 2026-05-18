@@ -36,6 +36,7 @@ class ControlCore {
     double maxSteeringAngle_;
     double steeringGain_;
     double linearVelocity_;
+    size_t lastLookaheadIndex_ = 0;
 };
 
 }

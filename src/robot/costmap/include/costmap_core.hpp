@@ -24,7 +24,11 @@ public:
 
     void markObstacle(int xGrid, int yGrid);
 
+    void dilateObstacles();
+
     void inflateObstacles();
+
+    void enforceHardBoundary();
 
     void publishCostmap(
         rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr costmapPub,

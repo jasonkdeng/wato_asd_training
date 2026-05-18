@@ -9,7 +9,7 @@ CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->
   this->declare_parameter<int>("height", height_);
   this->declare_parameter<double>("origin_x", originX_);
   this->declare_parameter<double>("origin_y", originY_);
-  this->declare_parameter<int>("inflation_radius", inflationRadius_);
+  this->declare_parameter<int>("inflation_radius", 8);
 
   resolution_ = this->get_parameter("resolution").as_double();
   width_ = this->get_parameter("width").as_int();
@@ -48,7 +48,9 @@ void CostmapNode::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr sca
     }
   }
 
+  costmap_.dilateObstacles();
   costmap_.inflateObstacles();
+  costmap_.enforceHardBoundary();
   costmap_.publishCostmap(costmapPub_, scan);
 }
 

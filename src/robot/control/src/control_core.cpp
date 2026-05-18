@@ -22,6 +22,7 @@ void ControlCore::initControlCore(
 void ControlCore::updatePath(nav_msgs::msg::Path path) {
   RCLCPP_INFO(logger_, "Path Updated");
   path_ = path;
+  lastLookaheadIndex_ = 0;
 }
 
 bool ControlCore::isPathEmpty() {
@@ -68,60 +69,25 @@ geometry_msgs::msg::Twist ControlCore::calculateControlCommand(
 
 unsigned int ControlCore::findLookaheadPoint(
   double robotX, double robotY, double robotTheta) {
-  double minDistance = std::numeric_limits<double>::max();
-  int lookaheadIndex = 0;
-  bool foundForward = false;
   size_t pathSize = path_.poses.size();
+  if (pathSize == 0) {
+    return 0;
+  }
 
-  // Search for closest forward-facing point
-  for (size_t i = 0; i < pathSize; ++i) {
+  size_t startIndex = std::min(lastLookaheadIndex_, pathSize - 1);
+  for (size_t i = startIndex; i < pathSize; ++i) {
     double dx = path_.poses[i].pose.position.x - robotX;
     double dy = path_.poses[i].pose.position.y - robotY;
     double distance = std::sqrt(dx * dx + dy * dy);
 
-    if (distance < lookaheadDistance_) {
-      continue;
-    }
-
-    double angleToPoint = std::atan2(dy, dx);
-    double angleDiff = angleToPoint - robotTheta;
-
-    // Normalize angle difference to [-π, π]
-    if (angleDiff > M_PI) {
-      angleDiff -= 2 * M_PI;
-    } else if (angleDiff < -M_PI) {
-      angleDiff += 2 * M_PI;
-    }
-
-    if (std::abs(angleDiff) < M_PI / 2) {
-      if (distance < minDistance) {
-        minDistance = distance;
-        lookaheadIndex = i;
-        foundForward = true;
-      }
+    if (distance >= lookaheadDistance_) {
+      lastLookaheadIndex_ = i;
+      return static_cast<unsigned int>(i);
     }
   }
 
-  // If no forward point found, find closest point regardless of direction
-  if (!foundForward) {
-    minDistance = std::numeric_limits<double>::max();
-    for (size_t i = 0; i < pathSize; ++i) {
-      double dx = path_.poses[i].pose.position.x - robotX;
-      double dy = path_.poses[i].pose.position.y - robotY;
-      double distance = std::sqrt(dx * dx + dy * dy);
-
-      if (distance < lookaheadDistance_) {
-        continue;
-      }
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        lookaheadIndex = i;
-      }
-    }
-  }
-
-  return lookaheadIndex;
+  lastLookaheadIndex_ = pathSize - 1;
+  return static_cast<unsigned int>(lastLookaheadIndex_);
 }
 
 }  

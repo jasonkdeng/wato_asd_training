@@ -65,6 +65,7 @@ class PlannerNode : public rclcpp::Node {
     double planTimeout_;
     double goalSearchRadius_;
     int clearanceCostThreshold_;
+    int hardObstacleThreshold_;
 };
 
 #endif 

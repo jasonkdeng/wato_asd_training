@@ -66,7 +66,8 @@ class PlannerCore {
     explicit PlannerCore(const rclcpp::Logger& logger);
 
     void initPlanner(double smoothing_factor, int iterations, double goal_tolerance,
-             double goal_search_radius, int clearance_cost_threshold);
+         double goal_search_radius, int clearance_cost_threshold,
+         int hard_obstacle_threshold);
 
     bool planPath(
         double startWorldX,
@@ -121,6 +122,7 @@ class PlannerCore {
     double goalTolerance_;
     double goalSearchRadius_;
     int clearanceCostThreshold_;
+    int hardObstacleThreshold_;
 
     rclcpp::Logger logger_;
     nav_msgs::msg::OccupancyGrid::SharedPtr map_;
